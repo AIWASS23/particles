@@ -9,25 +9,16 @@ import SwiftUI
 
 @main
 struct PocParticlesApp: App {
-
-    @State private var appModel = AppModel()
-
+    
+    init() {
+        ARParticles.current.controller.registerDetector(SoundDetection())
+        ARParticles.current.controller.registerDetector(VisionDetection())
+        ARParticles.current.controller.start()
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(appModel)
         }
-
-        ImmersiveSpace(id: appModel.immersiveSpaceID) {
-            ImmersiveView()
-                .environment(appModel)
-                .onAppear {
-                    appModel.immersiveSpaceState = .open
-                }
-                .onDisappear {
-                    appModel.immersiveSpaceState = .closed
-                }
-        }
-        .immersionStyle(selection: .constant(.full), in: .full)
     }
 }
