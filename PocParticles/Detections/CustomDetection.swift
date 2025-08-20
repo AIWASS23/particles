@@ -8,7 +8,8 @@
 
 import Foundation
 
-struct CustomDetection: DetectionSource {
+
+class CustomDetection: DetectionSource, @unchecked Sendable {
     
     let id: String
     private let producer: @Sendable () async -> AsyncStream<DetectionEvent>
@@ -25,13 +26,15 @@ struct CustomDetection: DetectionSource {
     func start() async {
         guard task == nil else { return }
         let stream = await producer()
-        let t = Task {
-            for await ev in stream { await EventBus.shared.post(ev) }
+        task = Task {
+            for await ev in stream {
+                await EventBus.shared.post(ev)
+            }
         }
-        task = t
     }
 
     func stop() async {
         task?.cancel()
+        task = nil
     }
 }

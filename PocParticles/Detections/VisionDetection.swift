@@ -16,7 +16,7 @@ import CoreML
 #endif
 
 
-class VisionDetection: NSObject, DetectionSource {
+class VisionDetection: NSObject, DetectionSource, @unchecked Sendable {
     let id: String = "vision"
     #if canImport(AVFoundation) && canImport(Vision)
     let session = AVCaptureSession()
@@ -50,7 +50,9 @@ class VisionDetection: NSObject, DetectionSource {
         guard !isRunning else { return }
         isRunning = true
         session.beginConfiguration()
+        #if os(iOS) || os(macOS) || os(tvOS)
         session.sessionPreset = .high
+        #endif
         guard let device = AVCaptureDevice.default(for: .video), let input = try? AVCaptureDeviceInput(device: device) else { return }
         if session.canAddInput(input) { session.addInput(input) }
         output.alwaysDiscardsLateVideoFrames = true
@@ -81,7 +83,7 @@ class VisionDetection: NSObject, DetectionSource {
 #if canImport(AVFoundation) && canImport(Vision)
 extension VisionDetection: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        var reqs = self.requests
+        let reqs = self.requests
         if reqs.isEmpty {
             // Fallback brightness heuristic → "bright" label
             if let buf = CMSampleBufferGetImageBuffer(sampleBuffer) {
@@ -91,9 +93,9 @@ extension VisionDetection: AVCaptureVideoDataOutputSampleBufferDelegate {
                 let base = CVPixelBufferGetBaseAddress(buf)!
                 let data = base.assumingMemoryBound(to: UInt8.self)
                 // sample a few pixels for quick luminance estimation
-                let stride = max(1, (width * height) / 50_000)
+                let step = max(1, (width * height) / 50_000)
                 var sum: Double = 0; var count = 0
-                for i in stride(from: 0, to: width*height*4, by: stride*4) { // assume BGRA
+                for i in stride(from: 0, to: width * height * 4, by: step * 4) { // assume BGRA
                     let b = Double(data[i])
                     let g = Double(data[i+1])
                     let r = Double(data[i+2])

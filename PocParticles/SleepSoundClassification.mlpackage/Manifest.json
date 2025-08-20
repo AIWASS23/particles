@@ -1,0 +1,24 @@
+{
+    "fileFormatVersion": "1.0.0",
+    "itemInfoEntries": {
+        "0888170C-C20B-43FD-A1F9-0A2D7BFD0ED6": {
+            "author": "com.apple.CoreML",
+            "description": "CoreML Model Specification",
+            "name": "SleepSoundClassification.mlmodel",
+            "path": "com.apple.CoreML/SleepSoundClassification.mlmodel"
+        },
+        "30679516-8E92-4869-8A4C-B262E53AFFC0": {
+            "author": "com.apple.CoreML",
+            "description": "External FeatureDescription Overlay",
+            "name": "FeatureDescriptions.json",
+            "path": "com.apple.CoreML/FeatureDescriptions.json"
+        },
+        "9B77EBEC-05B9-4771-AA00-920C8A40FE5B": {
+            "author": "com.apple.CoreML",
+            "description": "External Metadata Overlay",
+            "name": "Metadata.json",
+            "path": "com.apple.CoreML/Metadata.json"
+        }
+    },
+    "rootModelIdentifier": "0888170C-C20B-43FD-A1F9-0A2D7BFD0ED6"
+}

@@ -11,4 +11,7 @@ enum ParticleStyle {
     case dust
     case sparkle
     case glow
+    case fire
+    case smoke
+    
 }

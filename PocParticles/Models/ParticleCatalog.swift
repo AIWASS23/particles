@@ -22,7 +22,7 @@ struct ParticleCatalog: Sendable, Hashable {
     }
     
     static var `default`: ParticleCatalog {
-        var rain = ParticleBuilder(
+        let rain = ParticleBuilder(
             name: "Rain",
             runtime: RainParticle()
         )
@@ -32,7 +32,7 @@ struct ParticleCatalog: Sendable, Hashable {
             .opacity(0.6)
             .config
         
-        var dust = ParticleBuilder(
+        let dust = ParticleBuilder(
             name: "Dust",
             runtime: DustParticle()
         )
@@ -41,7 +41,7 @@ struct ParticleCatalog: Sendable, Hashable {
             .opacity(0.5)
             .config
         
-        var sparkle = ParticleBuilder(
+        let sparkle = ParticleBuilder(
             name: "Sparkle",
             runtime: SparkleParticle()
         )

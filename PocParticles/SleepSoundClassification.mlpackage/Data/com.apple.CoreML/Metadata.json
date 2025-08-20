@@ -1,0 +1,12 @@
+{
+  "MLModelVersionStringKey" : "1.0",
+  "MLModelDescriptionKey" : "A machine learning model that has been trained to classify sounds.",
+  "MLModelCreatorDefinedKey" : {
+    "com.apple.createml.version" : "10.15.2",
+    "com.apple.createml.app.tag" : "15703",
+    "sampleRate" : "16000",
+    "com.apple.createml.app.version" : "1.0"
+  },
+  "MLModelAuthorKey" : "Marcelo De Araújo",
+  "MLModelLicenseKey" : "MIT"
+}

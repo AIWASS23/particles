@@ -2,9 +2,6 @@
 //  SoundDetection.swift
 //  PocParticles
 //
-//  Created by Marcelo deAraújo on 14/08/25.
-//
-
 
 import Foundation
 #if canImport(AVFoundation)
@@ -15,10 +12,9 @@ import SoundAnalysis
 import CoreML
 #endif
 
-
-
-class SoundDetection: DetectionSource {
+class SoundDetection: DetectionSource, @unchecked Sendable {
     let id: String = "sound"
+    
     #if canImport(AVFoundation) && canImport(SoundAnalysis)
     var engine: AVAudioEngine?
     var analyzer: SNAudioStreamAnalyzer?
@@ -30,35 +26,84 @@ class SoundDetection: DetectionSource {
     let modelProvider: SoundModelProvider
     #endif
 
-    init() {
+    // Universal initializer
+    init(modelProvider: SoundModelProvider? = nil) {
         #if canImport(AVFoundation) && canImport(SoundAnalysis)
-        fatalError("Use init(modelProvider:) on platforms with SoundAnalysis")
+        guard let modelProvider = modelProvider else {
+            fatalError("modelProvider is required on platforms with SoundAnalysis")
+        }
+        self.modelProvider = modelProvider
         #else
-        // Non-Apple platforms or when SoundAnalysis is unavailable
+        // fallback para visionOS ou plataformas sem SoundAnalysis
         #endif
     }
 
-    #if canImport(AVFoundation) && canImport(SoundAnalysis)
-    init(modelProvider: SoundModelProvider) {
-        self.modelProvider = modelProvider
-    }
-    #endif
-
+//    func start() async {
+//        #if canImport(AVFoundation) && canImport(SoundAnalysis)
+//        guard !isRunning else { return }
+//        isRunning = true
+//        
+//        let engine = AVAudioEngine()
+//        self.engine = engine
+//        let input = engine.inputNode
+//        let format = input.inputFormat(forBus: 0)
+//        self.inputFormat = format
+//        
+//        let analyzer = SNAudioStreamAnalyzer(format: format)
+//        self.analyzer = analyzer
+//
+//        let request = try? SNClassifySoundRequest(mlModel: modelProvider.mlModel)
+//        self.request = request
+//
+//        let observer = ResultsObserver(sourceID: id)
+//        self.observer = observer
+//        if let req = request { try? analyzer.add(req, withObserver: observer) }
+//
+//        input.removeTap(onBus: 0)
+//        input.installTap(onBus: 0, bufferSize: 8192, format: format) { [weak self] buffer, time in
+//            guard let self else { return }
+//            self.queue.async { self.analyzer?.analyze(buffer, atAudioFramePosition: time.sampleTime) }
+//        }
+//        try? engine.start()
+//        #else
+//        // fallback demo: envia evento falso periodicamente
+//        Task.detached { [id] in
+//            while !Task.isCancelled {
+//                try? await Task.sleep(nanoseconds: 1_000_000_000)
+//                await EventBus.shared.post(DetectionEvent(source: id, label: "rain", confidence: 0.85))
+//            }
+//        }
+//        #endif
+//    }
+    
     func start() async {
         #if canImport(AVFoundation) && canImport(SoundAnalysis)
         guard !isRunning else { return }
+
+        // Solicita permissão de microfone
+        let granted = await requestMicrophoneAccess()
+        guard granted else {
+            print("Microphone access denied")
+            return
+        }
+
         isRunning = true
         
+        // Configura AVAudioEngine
         let engine = AVAudioEngine()
         self.engine = engine
         let input = engine.inputNode
         let format = input.inputFormat(forBus: 0)
-        self.inputFormat = format
         
+        guard format.channelCount > 0 && format.sampleRate > 0 else {
+            print("Audio format invalid: channelCount or sampleRate is zero")
+            return
+        }
+        
+        self.inputFormat = format
         let analyzer = SNAudioStreamAnalyzer(format: format)
         self.analyzer = analyzer
 
-        // Configure request with your Core ML sound classification model
         let request = try? SNClassifySoundRequest(mlModel: modelProvider.mlModel)
         self.request = request
 
@@ -73,7 +118,7 @@ class SoundDetection: DetectionSource {
         }
         try? engine.start()
         #else
-        // Fallback demo: periodically emit a fake "rain" label when the mic would be active.
+        // fallback demo: envia evento falso periodicamente
         Task.detached { [id] in
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
@@ -83,7 +128,8 @@ class SoundDetection: DetectionSource {
         #endif
     }
 
-    public func stop() async {
+
+    func stop() async {
         #if canImport(AVFoundation) && canImport(SoundAnalysis)
         guard isRunning else { return }
         engine?.stop()
@@ -96,18 +142,41 @@ class SoundDetection: DetectionSource {
         isRunning = false
         #endif
     }
+    
+    func requestMicrophoneAccess() async -> Bool {
+        #if os(visionOS)
+        await withCheckedContinuation { continuation in
+            AVAudioApplication.requestRecordPermission { granted in
+                continuation.resume(returning: granted)
+            }
+        }
+        #else
+        await withCheckedContinuation { continuation in
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                continuation.resume(returning: granted)
+            }
+        }
+        #endif
+    }
 }
 
 #if canImport(SoundAnalysis)
 final class ResultsObserver: NSObject, SNResultsObserving {
     let sourceID: String
+    
     init(sourceID: String) { self.sourceID = sourceID }
+    
     func request(_ request: SNRequest, didProduce result: SNResult) {
-        guard let res = result as? SNClassificationResult else { return }
-        // take top classification only (you can map more if you want)
-        guard let c = res.classifications.first else { return }
-        let ev = DetectionEvent(source: sourceID, label: c.identifier, confidence: Double(c.confidence))
-        Task { await EventBus.shared.post(ev) }
+        guard let res = result as? SNClassificationResult,
+              let classification = res.classifications.first else { return }
+        
+        let event = DetectionEvent(
+            source: sourceID,
+            label: classification.identifier,
+            confidence: Double(classification.confidence)
+        )
+        
+        Task { await EventBus.shared.post(event) }
     }
     func request(_ request: SNRequest, didFailWithError error: Error) { }
     func requestDidComplete(_ request: SNRequest) { }

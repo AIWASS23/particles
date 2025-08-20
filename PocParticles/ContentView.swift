@@ -24,59 +24,54 @@ struct ContentView: View {
                 Particle2DView()
                     .scope(Set([soundOn ? "sound" : nil, brightnessOn ? "vision" : nil].compactMap { $0 }))
                     .designSystem(.default)
-//                    .particles {
-//                        [
-//                            ParticleBuilder(name: "Rain", runtime: RainParticle())
-//                                .style(.rain)
-//                                .spawnRate(120)
-//                                .lifetime(2.0...3.0)
-//                                .opacity(0.6)
-//                                .trigger(LabelTrigger(source: "sound", label: "rain", minConfidence: 0.8))
-//                                .config,
-//                            
-//                            ParticleBuilder(name: "Sparkle", runtime: SparkleParticle())
-//                                .style(.sparkle)
-//                                .spawnRate(100)
-//                                .lifetime(0.4...0.8)
-//                                .trigger(LabelTrigger(source: "vision", label: "bright", minConfidence: 0.7))
-//                                .config
-//                        ]
-//                    }
-                
-//                    .particles {
+                    .particles {
+                        var particles: [ParticleConfig] = []
+
 //                        var rain = ParticleBuilder(name: "Rain", runtime: RainParticle())
-//                        rain.style(.rain)
+//                        rain = rain.style(.rain)
 //                            .spawnRate(120)
 //                            .lifetime(2.0...3.0)
 //                            .opacity(0.6)
 //                            .trigger(LabelTrigger(source: "sound", label: "rain", minConfidence: 0.8))
-//                        
+//                        particles.append(rain.config)
+//
 //                        var sparkle = ParticleBuilder(name: "Sparkle", runtime: SparkleParticle())
-//                        sparkle.style(.sparkle)
+//                        sparkle = sparkle.style(.sparkle)
 //                            .spawnRate(100)
 //                            .lifetime(0.4...0.8)
 //                            .trigger(LabelTrigger(source: "vision", label: "bright", minConfidence: 0.7))
-//                        
-//                        return [rain.config, sparkle.config]
-//                    }
-                
-                    .particles {
-                        var particles: [ParticleConfig] = []
+//                        particles.append(sparkle.config)
+                        
+//                        var glow = ParticleBuilder(name: "glow", runtime: GlowParticle())
+//                        glow = glow.style(.glow)
+//                            .spawnRate(100)
+//                            .lifetime(0.4...0.8)
+//                            .trigger(LabelTrigger(source: "sound", label: "bright", minConfidence: 0.7))
+//                        particles.append(glow.config)
+                        
+//                        var dust = ParticleBuilder(name: "dust", runtime: DustParticle())
+//                        dust = dust.style(.dust)
+//                            .spawnRate(100)
+//                            .lifetime(0.4...0.8)
+//                            .trigger(LabelTrigger(source: "sound", label: "bright", minConfidence: 0.7))
+//                        particles.append(dust.config)
+                        
+//                        var fire = ParticleBuilder(name: "fire", runtime: FireParticle())
+//                        fire = fire
+//                            .style(.fire)
+//                            .spawnRate(80)
+//                            .lifetime(0.5...1.2)
+//                            .trigger(LabelTrigger(source: "sound", label: "explosion", minConfidence: 0.6))
+//                        particles.append(fire.config)
 
-                        var rain = ParticleBuilder(name: "Rain", runtime: RainParticle())
-                        rain = rain.style(.rain)
-                            .spawnRate(120)
-                            .lifetime(2.0...3.0)
-                            .opacity(0.6)
-                            .trigger(LabelTrigger(source: "sound", label: "rain", minConfidence: 0.8))
-                        particles.append(rain.config)
+                        var smoke = ParticleBuilder(name: "smoke", runtime: SmokeParticle())
+                        smoke = smoke
+                            .style(.smoke)
+                            .spawnRate(50)
+                            .lifetime(1.5...2.5)
+                            .trigger(LabelTrigger(source: "sound", label: "explosion", minConfidence: 0.6))
+                        particles.append(smoke.config)
 
-                        var sparkle = ParticleBuilder(name: "Sparkle", runtime: SparkleParticle())
-                        sparkle = sparkle.style(.sparkle)
-                            .spawnRate(100)
-                            .lifetime(0.4...0.8)
-                            .trigger(LabelTrigger(source: "vision", label: "bright", minConfidence: 0.7))
-                        particles.append(sparkle.config)
 
                         return particles
                     }

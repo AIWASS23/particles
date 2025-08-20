@@ -10,18 +10,25 @@ import Foundation
 
 actor Animator {
     static let shared = Animator()
-    var lastTime: TimeInterval = Date().timeIntervalSince1970
-    var tickHandlers: [UUID: @Sendable (Double) -> Void] = [:]
-    var task: Task<Void, Never>? = nil
+    private var lastTime: TimeInterval = Date().timeIntervalSince1970
+    private var tickHandlers: [UUID: @Sendable (Double) -> Void] = [:]
+    private var task: Task<Void, Never>? = nil
 
     func addTick(_ handler: @escaping @Sendable (Double) -> Void) -> UUID {
         let id = UUID()
-        tickHandlers[id] = handler; start()
+        tickHandlers[id] = handler
+        start()
         return id
     }
     
     func removeTick(_ id: UUID) {
         tickHandlers.removeValue(forKey: id)
+    }
+
+    private func tick(dt: Double) {
+        for (_, handler) in tickHandlers {
+            handler(dt)
+        }
     }
 
     func start() {
@@ -30,11 +37,15 @@ actor Animator {
             guard let self else { return }
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 16_666_667) // ~60fps
-                let now = Date().timeIntervalSince1970
-                let dt = await now - lastTime
-                lastTime = now
-                for (_, h) in await tickHandlers { h(dt) }
+                await self.step()
             }
         }
+    }
+
+    private func step() {
+        let now = Date().timeIntervalSince1970
+        let dt = now - lastTime
+        lastTime = now
+        tick(dt: dt)
     }
 }
