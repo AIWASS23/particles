@@ -38,43 +38,6 @@ class SoundDetection: DetectionSource, @unchecked Sendable {
         #endif
     }
 
-//    func start() async {
-//        #if canImport(AVFoundation) && canImport(SoundAnalysis)
-//        guard !isRunning else { return }
-//        isRunning = true
-//        
-//        let engine = AVAudioEngine()
-//        self.engine = engine
-//        let input = engine.inputNode
-//        let format = input.inputFormat(forBus: 0)
-//        self.inputFormat = format
-//        
-//        let analyzer = SNAudioStreamAnalyzer(format: format)
-//        self.analyzer = analyzer
-//
-//        let request = try? SNClassifySoundRequest(mlModel: modelProvider.mlModel)
-//        self.request = request
-//
-//        let observer = ResultsObserver(sourceID: id)
-//        self.observer = observer
-//        if let req = request { try? analyzer.add(req, withObserver: observer) }
-//
-//        input.removeTap(onBus: 0)
-//        input.installTap(onBus: 0, bufferSize: 8192, format: format) { [weak self] buffer, time in
-//            guard let self else { return }
-//            self.queue.async { self.analyzer?.analyze(buffer, atAudioFramePosition: time.sampleTime) }
-//        }
-//        try? engine.start()
-//        #else
-//        // fallback demo: envia evento falso periodicamente
-//        Task.detached { [id] in
-//            while !Task.isCancelled {
-//                try? await Task.sleep(nanoseconds: 1_000_000_000)
-//                await EventBus.shared.post(DetectionEvent(source: id, label: "rain", confidence: 0.85))
-//            }
-//        }
-//        #endif
-//    }
     
     func start() async {
         #if canImport(AVFoundation) && canImport(SoundAnalysis)

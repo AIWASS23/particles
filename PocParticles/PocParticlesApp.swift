@@ -10,6 +10,8 @@ import SwiftUI
 @main
 struct PocParticlesApp: App {
     
+    @State private var appModel = AppModel()
+    
     init() {
         
         
@@ -29,6 +31,7 @@ struct PocParticlesApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(appModel)
         }
     }
 }

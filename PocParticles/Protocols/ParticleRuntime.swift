@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import RealityKit
 
 
 protocol ParticleRuntime: Sendable {
@@ -13,4 +14,7 @@ protocol ParticleRuntime: Sendable {
     func spawn(config: ParticleConfig, in rect: CGRect) -> [ParticleState]
     func update(dt: Double, state: inout [ParticleState])
     func draw(in ctx: inout GraphicsContext, state: [ParticleState])
+    
+    func spawnEntities(config: ParticleConfig) -> [Entity]
+    func updateEntities(dt: Double, entities: inout [Entity])
 }
